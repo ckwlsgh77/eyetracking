@@ -1,8 +1,11 @@
 # eyetracking
 
 Library : Opencv 3.6.0
-사용언어 : C++
-IDE : Visual Studio 2015
+
+Language : C++
+
+IDE : Visual Studio 2015 
+
 Use hardware : webcam
 
 
