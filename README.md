@@ -76,3 +76,5 @@ space bar 를 통해 eyetracking 기능을 on/off할 수 있다.
 동공을 찾는 기능은 준수하나 Haarcascade가 눈을 찾기까지의 과정이 불안정하다.
 
 Dlib의 facial landmark를 사용해 눈이미지를 crop해오는 방법 고려중..
+
+Landmakr 방법을 이용한다면 마우스 클릭 기능 구현 가능할 것 같다.
