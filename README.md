@@ -71,3 +71,7 @@ space bar 를 통해 eyetracking 기능을 on/off할 수 있다.
 ![191](https://user-images.githubusercontent.com/43734014/114256196-054d8080-99f3-11eb-97b2-b37b01c6a961.jpg)
 ![192](https://user-images.githubusercontent.com/43734014/114256198-054d8080-99f3-11eb-99b2-1e73f423c385.jpg)
 ![193](https://user-images.githubusercontent.com/43734014/114256200-05e61700-99f3-11eb-8dfb-648746dc4e97.jpg)
+
+
+동공을 찾는 기능은 준수하나 Haarcascade가 눈을 찾기까지의 과정이 불안정하다
+Dlib의 facial landmark를 사용해 눈이미지를 crop해오는 방법 고려중..
