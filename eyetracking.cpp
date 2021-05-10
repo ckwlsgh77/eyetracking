@@ -48,22 +48,11 @@ VideoCapture init_camera(int width, int height, int cameraNumber = 0) {
 	return capture;
 }
 
-
-
-Mat get_videoframe(VideoCapture capture) {
-	Mat frame;
-	capture.read(frame);
-	if (frame.empty()) {
-		cerr << "ERROR: 카메라를 열 수 없습니다. " << endl;
-		exit(1);
-	}
-	return frame;
-}
-
-
+/*
 Vec3f getEyeball(Mat &eye, vector<Vec3f> &firstpupil)      // 동공 찾기
 {
-	vector<int> sums(firstpupil.size(), 0);      //         
+	vector<int> sums(firstpupil.size(), 0);      //     
+
 	for (int y = 0; y < eye.rows; y++) {
 		uchar *ptr = eye.ptr<uchar>(y);
 		for (int x = 0; x < eye.cols; x++) {
@@ -79,6 +68,7 @@ Vec3f getEyeball(Mat &eye, vector<Vec3f> &firstpupil)      // 동공 찾기
 	}
 	int smallestSum = UCHAR_MAX;
 	int smallestSumIndex = 0;
+
 	for (int i = 0; i < firstpupil.size(); i++)
 	{
 		if (sums[i] < smallestSum)
@@ -89,6 +79,7 @@ Vec3f getEyeball(Mat &eye, vector<Vec3f> &firstpupil)      // 동공 찾기
 	}
 	return firstpupil[smallestSumIndex];
 }
+*/
 
 Rect getLeftmostEye(vector<Rect> &eyes)
 {
@@ -109,23 +100,21 @@ Rect getLeftmostEye(vector<Rect> &eyes)
 
 
 Mat subImage;
-vector<Point> centers, centers2;
 Point firstlastPoint, secondlastPoint;
 Point mousePoint;
 SIZE t;
 bool left_c = false, right_c = false, on = false;
-
+bool first_init = false;
 
 Point detectpupil(Mat &img_input) {
 	Point ret;
 
-
 	int sum_x = 0, sum_y = 0;
 	int count = 0;
-	for (int y = 10; y < img_input.rows; y++) {
+	for (int y = 0; y < img_input.rows; y++) {
 		for (int x = 0; x < img_input.cols; x++) {
 
-			if (!img_input.at<uchar>(y, x)) {
+			if (!img_input.at<uchar>(y, x)) { //0-검은색인 픽셀의 좌표값 누적
 				sum_x += x;
 				sum_y += y;
 				count++;
@@ -187,90 +176,80 @@ bool include_rect(Rect rect, Rect lefteye) {
 void detectEyes(Mat &frame, CascadeClassifier &faceCascade, CascadeClassifier &eyeCascade)
 {
 	Mat grayscale;
-	cvtColor(frame, grayscale, COLOR_BGR2GRAY); // convert image to grayscale
-	equalizeHist(grayscale, grayscale); // enhance image contrast
+	cvtColor(frame, grayscale, COLOR_BGR2GRAY);
+	equalizeHist(grayscale, grayscale);
 
 	vector<Rect> faces;
 	faceCascade.detectMultiScale(grayscale, faces, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(150, 150));
 	if (faces.size() == 0)
-		return; // none face was detected
+		return; // 얼굴탐지 실패
 
 
-	Mat face = grayscale(faces[0]); // crop the face
+	Mat face = grayscale(faces[0]);
 	vector<Rect> eyes;
-	eyeCascade.detectMultiScale(face, eyes, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30)); // same thing as above
+	eyeCascade.detectMultiScale(face, eyes, 1.1, 2, 0 | CASCADE_SCALE_IMAGE, Size(30, 30));
 
 
 	if (eyes.size() != 2)
-		return; // both eyes were not detected
+		return; // 눈2개 탐지실패
 
 
 	Rect lefteyeRect = getLeftmostEye(eyes);
 
-	Mat lefteye;
+	
 
-	Point lefteyeRect_center;
-	lefteyeRect_center.x = (faces[0].tl().x * 2 + lefteyeRect.tl().x + lefteyeRect.br().x) / 2;
-	lefteyeRect_center.y = (faces[0].tl().y * 2 + lefteyeRect.tl().y + lefteyeRect.br().y) / 2;
+	//Point lefteyeRect_center;
+	//lefteyeRect_center.x = (faces[0].tl().x * 2 + lefteyeRect.tl().x + lefteyeRect.br().x) / 2;
+	//lefteyeRect_center.y = (faces[0].tl().y * 2 + lefteyeRect.tl().y + lefteyeRect.br().y) / 2;
 
 
-	if (!include_rect(rect, lefteyeRect))
+	if (!include_rect(rect, lefteyeRect)) //왼쪽눈이 초록색 사각형에 포함되어있는지 확인
 	{
 		on = true;
 	}
 	else
 		on = false;
 
+	Mat lefteye;
+
 	cvtColor(subImage, subImage, COLOR_BGR2GRAY);
 
 	equalizeHist(subImage, lefteye);
 
 	vector<Vec3f> b_firstpupil;
-	Mat binary_eye = image_binary(lefteye);
+	Mat binary_eye = image_binary(lefteye); //왼쪽눈 이진화
 
 	Point t_center = (0, 0);
-	t_center = detectpupil(binary_eye);
-	circle(binary_eye, t_center, 10, Scalar(0, 0, 0), -1);
+	t_center = detectpupil(binary_eye); //동공찾기
 
-	HoughCircles(binary_eye, b_firstpupil, HOUGH_GRADIENT, 1, lefteye.cols / 8, 250, 15, 3, 15);
-	resize(binary_eye, binary_eye, Size(300, 300));
+	//circle(binary_eye, t_center, 10, Scalar(0, 0, 0), -1); //찾은 동공에 원그림
+	//HoughCircles(binary_eye, b_firstpupil, HOUGH_GRADIENT, 1, lefteye.cols / 8, 250, 15, 3, 15); //그린원에서 동그라미를 찾음
 	
 
 	Point a, b;
+	
 
-
-	if (b_firstpupil.size() > 0 && on) {
+	if (on) {
 
 		left_c = true;
 
-		Vec3f eyeball = getEyeball(binary_eye, b_firstpupil);
+		//Vec3f eyeball = getEyeball(binary_eye, b_firstpupil);
 
-		Point center(eyeball[0], eyeball[1]);
+		Point center = t_center;//(eyeball[0], eyeball[1]);
 
-
-
-		centers.push_back(center);
-
-
-		if (centers.size() > 1)
+		if (first_init)
 		{
 			Point diff;
 			diff.x = (center.x - firstlastPoint.x) * 30;
 			diff.y = (center.y - firstlastPoint.y) * 35;
 			a = diff;
 		}
+		first_init = true;
 		firstlastPoint = center;
+		
+		//int radius = (int)eyeball[2];
 
-		int radius = (int)eyeball[2];
-
-		circle(lefteye, center, radius, Scalar(255, 255, 255), 2);
-		//circle(frame, center, radius, Scalar(255, 255, 255), 2);
-		string path = "pic\\";
-		path += to_string(cnt);
-		path += ".jpg";
-		imwrite(path, lefteye);
-		cnt++;
-		imshow("eye", lefteye);
+		//circle(lefteye, center, radius, Scalar(255, 255, 255), 2);
 		
 	}
 	else
@@ -342,7 +321,7 @@ int main(int argc, char **argv)
 			detectEyes(frame, faceCascade, eyeCascade);
 
 			if (on);
-				//changeMouse(frame, mousePoint);
+				changeMouse(frame, mousePoint);
 		}
 		else
 			rectangle(frame, rect.tl(), rect.br(), Scalar(0, 0, 255), 2);
