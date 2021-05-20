@@ -5,10 +5,8 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/objdetect/objdetect.hpp>
-#include <SDKDDKVer.h>
 #include "Windows.h"
-#include "winuser.h"
-#include "conio.h"
+
 
 using namespace cv;
 using namespace std;
