@@ -16,6 +16,13 @@ const char *eyeCascadeFilename = "haarcascades\\haarcascade_lefteye_2splits.xml"
 Rect rect;
 int cnt = 0;
 
+Mat subImage;
+Point firstlastPoint; // 이전 커서 좌표
+Point mousePoint; // 커서 좌표
+SIZE t; //화면 크기
+bool left_c = false, right_c = false, on = false;
+bool first_init = false;
+
 void load_classifier(CascadeClassifier &cascade, string filename) {
 	try {
 		string path = filename;
@@ -94,15 +101,6 @@ Rect getLeftmostEye(vector<Rect> &eyes)
 	return eyes[leftmostIndex];
 }
 
-
-
-
-Mat subImage;
-Point firstlastPoint, secondlastPoint;
-Point mousePoint;
-SIZE t;
-bool left_c = false, right_c = false, on = false;
-bool first_init = false;
 
 Point detectpupil(Mat &img_input) {
 	Point ret;
@@ -287,7 +285,7 @@ int main(int argc, char **argv)
 
 	// Check if everything is ok
 	if (faceCascade.empty() || eyeCascade.empty() || !cap.isOpened())
-		return 1;
+		return 0;
 
 	Mat frame;
 	bool rect_on = false;
