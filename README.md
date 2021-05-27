@@ -11,10 +11,11 @@ Use hardware : webcam
 
 사각형 프레임안에 눈을 위치시키고 눈동자를 움직여 커서를 움직인다.
 
-사각형 프레임을 움직일 수 있다.
+방향키를 통해 사각형 프레임을 움직일 수 있다.
 
-space bar 를 통해 eyetracking 기능을 on/off할 수 있다.
+enter key 를 통해 eyetracking 기능을 on/off할 수 있다.
 
+space bar 를 통해 커서를 화면 가운데로 이동시킬 수 있다.
 
 ![140](https://user-images.githubusercontent.com/43734014/114256134-f4047400-99f2-11eb-9220-01ebdc573a35.jpg)
 ![141](https://user-images.githubusercontent.com/43734014/114256135-f49d0a80-99f2-11eb-84c9-a6a87b7456d7.jpg)
