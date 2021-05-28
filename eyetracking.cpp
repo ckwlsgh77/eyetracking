@@ -11,8 +11,8 @@
 using namespace cv;
 using namespace std;
 
-const char *faceCascadeFilename = "haarcascades\\haarcascade_frontalface_default.xml";
-const char *eyeCascadeFilename = "haarcascades\\haarcascade_lefteye_2splits.xml";
+const char *faceCascadeFilename = "haarcascades/haarcascade_frontalface_default.xml";
+const char *eyeCascadeFilename = "haarcascades/haarcascade_lefteye_2splits.xml";
 Rect rect;
 int cnt = 0;
 
@@ -24,15 +24,15 @@ bool left_c = false, right_c = false, on = false;
 bool first_init = false;
 
 void load_classifier(CascadeClassifier &cascade, string filename) {
-	try {
-		string path = filename;
-		cascade.load(path);
-	}
-	catch (Exception e) {}
+	
+	string path = filename;
+	cascade.load(path);
+	
 	if (cascade.empty()) {
 		cerr << "에러: [" << filename << "] 파일을 읽을 수 없습니다!" << endl;
 		exit(1);
 	}
+
 	cout << "[" << filename << "] 읽기 완료." << endl;
 }
 
@@ -102,8 +102,8 @@ Rect getLeftmostEye(vector<Rect> &eyes)
 }
 
 
-Point detectpupil(Mat &img_input) {
-	Point ret;
+POINT detectpupil(Mat &img_input) {
+	POINT ret;
 
 	int sum_x = 0, sum_y = 0;
 	int count = 0;
@@ -118,8 +118,9 @@ Point detectpupil(Mat &img_input) {
 		}
 
 	}
+
 	if (count <= 0)
-		return NULL;
+		return { -1,-1 };
 
 
 	ret.x = sum_x / count;
@@ -189,55 +190,51 @@ void detectEyes(Mat &frame, CascadeClassifier &faceCascade, CascadeClassifier &e
 	if (eyes.size() != 2)
 		return; // 눈2개 탐지실패
 
-
 	Rect lefteyeRect = getLeftmostEye(eyes);
-
-	
 
 	//Point lefteyeRect_center;
 	//lefteyeRect_center.x = (faces[0].tl().x * 2 + lefteyeRect.tl().x + lefteyeRect.br().x) / 2;
 	//lefteyeRect_center.y = (faces[0].tl().y * 2 + lefteyeRect.tl().y + lefteyeRect.br().y) / 2;
 
+	Mat lefteye;
+	Mat binary_eye;
+	POINT t_center = { 0, 0 };
+
 
 	if (!include_rect(rect, lefteyeRect)) //왼쪽눈이 초록색 사각형에 포함되어있는지 확인
 	{
 		on = true;
+		cvtColor(subImage, subImage, COLOR_BGR2GRAY);
+		equalizeHist(subImage, lefteye);
+		binary_eye = image_binary(lefteye); //왼쪽눈 이진화
+		t_center = detectpupil(binary_eye); //동공찾기
 	}
 	else
 		on = false;
 
-	Mat lefteye;
-
-	cvtColor(subImage, subImage, COLOR_BGR2GRAY);
-
-	equalizeHist(subImage, lefteye);
-
-	Mat binary_eye = image_binary(lefteye); //왼쪽눈 이진화
-
-	Point t_center = (0, 0);
-	t_center = detectpupil(binary_eye); //동공찾기
+	if (t_center.x <= 0 || t_center.y <= 0)
+		on = false;
 
 	//circle(binary_eye, t_center, 10, Scalar(0, 0, 0), -1); //찾은 동공에 원그림
 	//HoughCircles(binary_eye, b_firstpupil, HOUGH_GRADIENT, 1, lefteye.cols / 8, 250, 15, 3, 15); //그린원에서 동그라미를 찾음
 	
 
-	Point a, b;
+	POINT dif;
 	
-
 	if (on) {
 
 		left_c = true;
 
 		//Vec3f eyeball = getEyeball(binary_eye, b_firstpupil);
 
-		Point center = t_center;//(eyeball[0], eyeball[1]);
+		POINT center = t_center;//(eyeball[0], eyeball[1]);
 
 		if (first_init)
 		{
-			Point diff;
+			POINT diff;
 			diff.x = (center.x - lastPoint.x) * 30;
 			diff.y = (center.y - lastPoint.y) * 35;
-			a = diff;
+			dif = diff;
 		}
 		first_init = true;
 		lastPoint.x = center.x;
@@ -254,8 +251,8 @@ void detectEyes(Mat &frame, CascadeClassifier &faceCascade, CascadeClassifier &e
 
 	if (left_c) {
 		GetCursorPos(&mousePoint);
-		mousePoint.x += (a.x);
-		mousePoint.y += (a.y);
+		mousePoint.x += (dif.x);
+		mousePoint.y += (dif.y);
 	}
 }
 
