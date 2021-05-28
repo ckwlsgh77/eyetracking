@@ -17,8 +17,8 @@ Rect rect;
 int cnt = 0;
 
 Mat subImage;
-Point firstlastPoint; // 이전 커서 좌표
-Point mousePoint; // 커서 좌표
+POINT lastPoint; // 이전 커서 좌표
+POINT mousePoint; // 커서 좌표
 SIZE t; //화면 크기
 bool left_c = false, right_c = false, on = false;
 bool first_init = false;
@@ -156,7 +156,7 @@ void moveRect(int key)
 		rect.x += 5;
 		break;
 	case 32:
-		mousePoint = Point(t.cx / 2, t.cy / 2);
+		mousePoint = { t.cx / 2, t.cy / 2 };
 	default:
 		break;
 	}
@@ -212,7 +212,6 @@ void detectEyes(Mat &frame, CascadeClassifier &faceCascade, CascadeClassifier &e
 
 	equalizeHist(subImage, lefteye);
 
-	vector<Vec3f> b_firstpupil;
 	Mat binary_eye = image_binary(lefteye); //왼쪽눈 이진화
 
 	Point t_center = (0, 0);
@@ -236,12 +235,14 @@ void detectEyes(Mat &frame, CascadeClassifier &faceCascade, CascadeClassifier &e
 		if (first_init)
 		{
 			Point diff;
-			diff.x = (center.x - firstlastPoint.x) * 30;
-			diff.y = (center.y - firstlastPoint.y) * 35;
+			diff.x = (center.x - lastPoint.x) * 30;
+			diff.y = (center.y - lastPoint.y) * 35;
 			a = diff;
 		}
 		first_init = true;
-		firstlastPoint = center;
+		lastPoint.x = center.x;
+		lastPoint.y = center.y;
+
 		
 		//int radius = (int)eyeball[2];
 
@@ -252,6 +253,7 @@ void detectEyes(Mat &frame, CascadeClassifier &faceCascade, CascadeClassifier &e
 		left_c = false;
 
 	if (left_c) {
+		GetCursorPos(&mousePoint);
 		mousePoint.x += (a.x);
 		mousePoint.y += (a.y);
 	}
@@ -259,7 +261,7 @@ void detectEyes(Mat &frame, CascadeClassifier &faceCascade, CascadeClassifier &e
 
 
 
-void changeMouse(Mat &frame, Point &location)
+void changeMouse(Mat &frame, POINT &location)
 {
 	if (location.x > t.cx)
 		location.x = t.cx;
@@ -294,7 +296,7 @@ int main(int argc, char **argv)
 	t.cx = GetSystemMetrics(SM_CXFULLSCREEN);
 	t.cy = GetSystemMetrics(SM_CYFULLSCREEN);
 
-	mousePoint = Point(t.cx / 2, t.cy / 2);//프로그램 시작시 화면 정 중앙에 마우스 위치
+	mousePoint = { t.cx / 2, t.cy / 2 };//프로그램 시작시 화면 정 중앙에 마우스 위치
 	int i = 0;
 
 	rect.x = 200;
