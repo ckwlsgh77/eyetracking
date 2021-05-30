@@ -294,7 +294,6 @@ int main(int argc, char **argv)
 	t.cy = GetSystemMetrics(SM_CYFULLSCREEN);
 
 	mousePoint = { t.cx / 2, t.cy / 2 };//프로그램 시작시 화면 정 중앙에 마우스 위치
-	int i = 0;
 
 	rect.x = 200;
 	rect.y = 120;
@@ -302,7 +301,7 @@ int main(int argc, char **argv)
 	rect.height = 50;
 
 
-	while (i < 5000)
+	while (1)
 	{
 		cap >> frame; // outputs the webcam image to a Mat
 		flip(frame, frame, 1);
@@ -336,7 +335,6 @@ int main(int argc, char **argv)
 		else {
 			moveRect(key);
 		}
-		i++;
 	}
 	return 0;
 }
